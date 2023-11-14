@@ -61,7 +61,7 @@ class SalesforceDataCloud:
             "privateKeyFile": os.getenv('privateKeyFile'),
             "userName": os.getenv('userName'),
             "tempDir": os.getenv('tempDir'),
-            "inputFileEncoding": os.getenv("inputFileEncoding"),
+            "inputFileEncoding": os.getenv("inputFileEncoding", "utf-8"),
             "dne_cdpTokenRefreshTime": 0,
         }
         # Read the private key from a file
@@ -178,7 +178,7 @@ class SalesforceDataCloud:
 
         return result_lists
 
-    def streaming_upsert(self, source_api_name: str, source_object_name: str, data: object, test_mode: bool=False):
+    def streaming_upsert(self, source_api_name: str, source_object_name: str, data: object, test_mode: bool=False) -> requests.Response:
         """
         Upsert one or more rows of data via Streaming Ingest API
 
@@ -244,7 +244,7 @@ class SalesforceDataCloud:
         logger.info(f"Using job id:{job_id}")
         return job_id
     
-    def _close_job(self, job_id: str, state: str="UploadComplete"):
+    def _close_job(self, job_id: str, state: str="UploadComplete") -> requests.Response:
         """
         Closes the specified job
 
@@ -266,7 +266,7 @@ class SalesforceDataCloud:
         logger.info(response.text)
         return response
     
-    def _bulk_operation(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable, operation: str="upsert"):
+    def _bulk_operation(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable, operation: str="upsert") -> requests.Response:
         """
         Upsert or delete one or more files of data via Bulk Ingest API
 
@@ -284,7 +284,7 @@ class SalesforceDataCloud:
 
         def split_callback(split_file_path: str, split_file_size: int):
                     logger.info(f"Uploading file part: {split_file_path} (size:{split_file_size})")
-                    with open(split_file_path, 'r', encoding="utf8") as payload_file:
+                    with open(split_file_path, 'r', encoding=self.context["inputFileEncoding"]) as payload_file:
                         payload = payload_file.read()
                         response = requests.request("PUT", url, headers=headers, data=payload.encode('utf-8'))
 
@@ -307,10 +307,7 @@ class SalesforceDataCloud:
             for file_path in data_file_paths:
                 logger.info(f"Processing file {file_path}")
                 split = Split(file_path, self.context["tempDir"])
-                if self.context["inputFileEncoding"]:
-                    split.bysize(size=BULK_API_MAX_PAYLOAD_SIZE, newline=True, includeheader=True, callback=split_callback, encoding=self.context["inputFileEncoding"], split_file_encoding="utf-8")
-                else:    
-                    split.bysize(size=BULK_API_MAX_PAYLOAD_SIZE, newline=True, includeheader=True, callback=split_callback)
+                split.bysize(size=BULK_API_MAX_PAYLOAD_SIZE, newline=True, includeheader=True, callback=split_callback)
 
             response=self._close_job(job_id)
             job_id=None
@@ -320,7 +317,7 @@ class SalesforceDataCloud:
         
         return response
     
-    def bulk_upsert(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable):
+    def bulk_upsert(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable) -> requests.Response:
         """
         Upsert one or more files of data via Bulk Ingest API
 
@@ -331,9 +328,9 @@ class SalesforceDataCloud:
         Returns the response object from the API call
         """
 
-        self._bulk_operation(source_api_name=source_api_name, source_object_name=source_object_name, data_file_paths=data_file_paths, operation="upsert")
+        return self._bulk_operation(source_api_name=source_api_name, source_object_name=source_object_name, data_file_paths=data_file_paths, operation="upsert")
 
-    def bulk_delete(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable):
+    def bulk_delete(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable) -> requests.Response:
         """
         Delete rows via the Bulk API that match the identifiers contained in one or more files
 
@@ -344,9 +341,9 @@ class SalesforceDataCloud:
         Returns the response object from the API call
         """
 
-        self._bulk_operation(source_api_name=source_api_name, source_object_name=source_object_name, data_file_paths=data_file_paths, operation="delete")
+        return self._bulk_operation(source_api_name=source_api_name, source_object_name=source_object_name, data_file_paths=data_file_paths, operation="delete")
 
-    def list_jobs(self, limit: int=50, offset=0, orderby: str="", state: str=""):
+    def list_jobs(self, limit: int=50, offset=0, orderby: str="", state: str="") -> requests.Response:
         """
         Retrieves all jobs in Data Cloud
 
@@ -369,7 +366,7 @@ class SalesforceDataCloud:
         logger.info(json.dumps(response.json(), indent = 2))
         return response
 
-    def job_info(self, job_id: str):
+    def job_info(self, job_id: str) -> requests.Response:
         """
         Retrieves detailed information about the specified job.
 
@@ -389,7 +386,7 @@ class SalesforceDataCloud:
         logger.info(json.dumps(response.json(), indent = 2))
         return response
     
-    def abort_job(self, job_id: str):
+    def abort_job(self, job_id: str) -> requests.Response:
         """
         Attempts to abort the specified job
 
@@ -399,7 +396,7 @@ class SalesforceDataCloud:
         """
         return self._close_job(job_id, "Aborted")
     
-    def abort_all_jobs(self):
+    def abort_all_jobs(self) -> None:
         """
         Attempts to abort all Open and UploadComplete jobs in Data Cloud
         """
@@ -416,7 +413,7 @@ class SalesforceDataCloud:
 
         * query_str (str) - The query to execute
         
-        Response	Dataframe containing query output
+        Returns a Dataframe containing query output
         """
         self._authenticate()
         logger.info(f'Execute Query: "{query_str}""...')
@@ -502,7 +499,7 @@ Command Line Functions:
         else:
             logger.error('Must specify job_id when command is "abort_job"')
     else:
-        logger.error(f"Invalid command:{command}")
+        logger.error(f"Invalid command:{selected_command}")
     
                 
 if __name__ == "__main__":

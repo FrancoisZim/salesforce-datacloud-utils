@@ -56,7 +56,16 @@ Delete rows via the Bulk API that match the identifiers contained in one or more
 Returns the response object from the API call
 
 ### Query data
+Example: `sample_sql_query.py`
 
+```python
+def query(self, query_str: str) -> pd.DataFrame:
+```
+Returns the result of the specified query
+
+* query_str (str) - The query to execute
+
+Returns a Dataframe containing query output
 
 ### View or terminate bulk jobs
 
@@ -129,6 +138,6 @@ Configure the following as environment variables or write to a .env file in the 
 * privateKeyFile - Path to the Private Key file generated above (server.key)
 * userName - The pre-authorised salesforce user that will be used for API access
 * tempDir - Directory for creating temporary files during execution
-* inputFileEncoding - Optional: Specifies the encoding of the source files that will be uploaded via the IngestAPI (e.g. utf-8)
+* inputFileEncoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
 
 
