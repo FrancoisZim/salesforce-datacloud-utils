@@ -31,7 +31,7 @@ TODO
 
 Configure the following as environment variables or write to a .env file in the installation directory:
 
-* client - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
+* clientId - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
 * privateKeyFile - Path to the Private Key file generated above (server.key)
 * userName - The pre-authorised salesforce user that will be used for API access
 * tempDir - Directory for creating temporary files during execution
