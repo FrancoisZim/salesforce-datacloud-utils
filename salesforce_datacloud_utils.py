@@ -72,7 +72,7 @@ class SalesforceDataCloud:
         """
         Login to data cloud instance and store access token etc. for api calls
 
-        force_refresh (bool): If set then gets a new token even if the current one is still valid
+        * force_refresh (bool): If set then gets a new token even if the current one is still valid
         """
         logger.info("Token refresh time: " + str(self.context["dne_cdpTokenRefreshTime"]))
         cdpTokenAge = round((time.time() * 1000 - self.context["dne_cdpTokenRefreshTime"]) / 60000)
@@ -182,10 +182,10 @@ class SalesforceDataCloud:
         """
         Upsert one or more rows of data via Streaming Ingest API
 
-        source_api_name (str): Name of the Ingest API data connector
-        source_object_name (str): Name of the resource type to send to Data Cloud
-        data (str): Array of dicts with one dict per row
-        test_mode (bool): Validate payload only (default: false)
+        * source_api_name (str): Name of the Ingest API data connector
+        * source_object_name (str): Name of the resource type to send to Data Cloud
+        * data (str): Array of dicts with one dict per row
+        * test_mode (bool): Validate payload only (default: false)
 
         Returns the response object from the API call
         """
@@ -217,8 +217,8 @@ class SalesforceDataCloud:
         """
         Open a new batch job
 
-        source_api_name (str): Name of the Ingest API data connector
-        source_object_name (str): Name of the resource type to send to Data Cloud
+        * source_api_name (str): Name of the Ingest API data connector
+        * source_object_name (str): Name of the resource type to send to Data Cloud
 
         return: job_id (str)
         """
@@ -248,8 +248,8 @@ class SalesforceDataCloud:
         """
         Closes the specified job
 
-        job_id (int) - The job id returned in the response body from the Create Job request.
-        state (str) - Optional: Close with specified state (UploadComplete or Abort - Default=UploadComplete)
+        * job_id (int) - The job id returned in the response body from the Create Job request.
+        * state (str) - Optional: Close with specified state (UploadComplete or Abort - Default=UploadComplete)
 
         Returns the response object from the API call
         """
@@ -268,11 +268,12 @@ class SalesforceDataCloud:
     
     def _bulk_operation(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable, operation: str="upsert"):
         """
-        Upsert one or more files of data via Bulk Ingest API
+        Upsert or delete one or more files of data via Bulk Ingest API
 
-        source_api_name (str): Name of the Ingest API data connector
-        source_object_name (str): Name of the resource type to send to Data Cloud
-        data_file_paths (iter): Iterable that emits a list of file paths for upload
+        * source_api_name (str): Name of the Ingest API data connector
+        * source_object_name (str): Name of the resource type to send to Data Cloud
+        * data_file_paths (iter): Iterable that emits a list of file paths for upload
+        * operation (str): "upsert" or "delete" (Default="upsert")
 
         Returns the response object from the API call
         """
@@ -323,9 +324,9 @@ class SalesforceDataCloud:
         """
         Upsert one or more files of data via Bulk Ingest API
 
-        source_api_name (str): Name of the Ingest API data connector
-        source_object_name (str): Name of the resource type to send to Data Cloud
-        data_file_paths (iter): Iterable that emits a list of file paths for upload
+        * source_api_name (str): Name of the Ingest API data connector
+        * source_object_name (str): Name of the resource type to send to Data Cloud
+        * data_file_paths (iter): Iterable that emits a list of file paths for upload
 
         Returns the response object from the API call
         """
@@ -334,11 +335,11 @@ class SalesforceDataCloud:
 
     def bulk_delete(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable):
         """
-        Delete rows via Bulk Ingest API
+        Delete rows via the Bulk API that match the identifiers contained in one or more files
 
-        source_api_name (str): Name of the Ingest API data connector
-        source_object_name (str): Name of the resource type to send to Data Cloud
-        data_file_paths (iter): Iterable that emits a list of file paths for upload
+        * source_api_name (str): Name of the Ingest API data connector
+        * source_object_name (str): Name of the resource type to send to Data Cloud
+        * data_file_paths (iter): Iterable that emits a list of file paths for upload
 
         Returns the response object from the API call
         """
@@ -349,10 +350,10 @@ class SalesforceDataCloud:
         """
         Retrieves all jobs in Data Cloud
 
-        limit (int) - The number of records to return. Defaults to 20. Maximum up to 100 records per request.
-        offset (int) - Number of rows to skip before returning.
-        orderBy (str) - The field used to order job definition results. The default order is by systemModstamp.
-        states (str)	Get jobs in specific states. Valid states are Open, UploadComplete, Failed, Aborted, and JobComplete. The parameter’s value can be a comma-delimited list.
+        * limit (int) - The number of records to return. Defaults to 20. Maximum up to 100 records per request.
+        * offset (int) - Number of rows to skip before returning.
+        * orderBy (str) - The field used to order job definition results. The default order is by systemModstamp.
+        * states (str)	Get jobs in specific states. Valid states are Open, UploadComplete, Failed, Aborted, and JobComplete. The parameter’s value can be a comma-delimited list.
 
         Returns the response object from the API call
         """
@@ -372,7 +373,7 @@ class SalesforceDataCloud:
         """
         Retrieves detailed information about the specified job.
 
-        job_id (int) - The job id returned in the response body from the Create Job request.
+        * job_id (int) - The job id returned in the response body from the Create Job request.
 
         Returns the response object from the API call
         """
@@ -392,7 +393,7 @@ class SalesforceDataCloud:
         """
         Attempts to abort the specified job
 
-        job_id (int) - The job id returned in the response body from the Create Job request.
+        * job_id (int) - The job id returned in the response body from the Create Job request.
         
         Returns the response object from the API call
         """
@@ -413,11 +414,9 @@ class SalesforceDataCloud:
         """
         Returns the result of the specified query
 
-        query_str (str) - The query to execute
+        * query_str (str) - The query to execute
         
-        Returns dataframe, json or text
-
-        Response	Dataframe containing uery output
+        Response	Dataframe containing query output
         """
         self._authenticate()
         logger.info(f'Execute Query: "{query_str}""...')

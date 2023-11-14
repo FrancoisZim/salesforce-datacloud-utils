@@ -1,6 +1,9 @@
+"""Sample script to illustrate how to upsert data to Salesforce Data Cloud"""
 from salesforce_datacloud_utils import SalesforceDataCloud
 
 sfdc=SalesforceDataCloud()
+
+#CSV Headers: maid,first_name,last_name,email,gender,city,state,created
 data_json={
     "data": [
         {
@@ -26,4 +29,4 @@ data_json={
     ]
 }
 
-sfdc.streaming_upsert("External_Data", "runner_profiles", data_json)
+sfdc.streaming_upsert("Event_API", "runner_profiles", data_json)

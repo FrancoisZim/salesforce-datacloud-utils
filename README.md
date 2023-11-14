@@ -1,6 +1,89 @@
 # salesforce-datacloud-utils
 Simple utility functions for calling the Salesforce Data Cloud APIs, specifically the Ingest API and Query APIv2.
 
+## Overview
+
+This package provides a basic REST API wrapper around the Salesforce Data Cloud API.  To use:
+
+### Create a new instance of the SalesforceDataCloud class
+
+```python
+from salesforce_datacloud_utils import SalesforceDataCloud
+sfdc=SalesforceDataCloud()
+```
+
+### Upstert Date via Streaming Ingest API
+Example: `sample_streaming_upsert.py`
+
+```python
+def streaming_upsert(self, source_api_name: str, source_object_name: str, data: object, test_mode: bool=False)
+```
+Upsert one or more rows of data via Streaming Ingest API
+
+* source_api_name (str): Name of the Ingest API data connector
+* source_object_name (str): Name of the resource type to send to Data Cloud
+* data (str): Array of dicts with one dict per row
+* test_mode (bool): Validate payload only (default: false)
+
+Returns the response object from the API call
+
+### Upstert Date via Bulk Ingest API
+Example: `sample_bulk_upsert.py`
+
+```python
+def bulk_upsert(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable)
+```
+Upsert one or more files of data via Bulk Ingest API
+
+* source_api_name (str): Name of the Ingest API data connector
+* source_object_name (str): Name of the resource type to send to Data Cloud
+* data_file_paths (iter): Iterable that emits a list of file paths for upload
+
+Returns the response object from the API call
+
+### Delete Date via Bulk Ingest API
+Example: `sample_bulk_delete.py`
+
+```python
+def bulk_delete(self, source_api_name: str, source_object_name: str, data_file_paths: Iterable)
+```
+Delete rows via the Bulk API that match the identifiers contained in one or more files
+
+* source_api_name (str): Name of the Ingest API data connector
+* source_object_name (str): Name of the resource type to send to Data Cloud
+* data_file_paths (iter): Iterable that emits a list of file paths for upload
+
+Returns the response object from the API call
+
+### Query data
+
+
+### View or terminate bulk jobs
+
+
+### CLI Usage Notes
+A subset of functions are exposed via CLI to enable you to monitor and terminate active jobs if required.
+
+```console
+usage: python3 salesforce_datacloud_utils.py [-h] [--command {list_active_jobs,list_all_jobs,job_info,abort_job}] [--job_id JOB_ID]
+
+Utility functions for the Data Cloud API
+
+Command Line Functions:
+- list_active_jobs: (default action) Show jobs with status "Open,UploadComplete,InProgress"
+- list_all_jobs: Show all jobs
+- job_info: Show detailed information for the specified job
+- abort_job: Terminate the specified job with state "Aborted"
+        
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --command {list_active_jobs,list_all_jobs,job_info,abort_job}
+                        Select the operation to execute
+  --job_id JOB_ID       The job id returned in the response body from the Create Job request.
+```
+
+
 ## Pre-requisites
 
 ### Configure Data Cloud Connected App and OAuth Certificates
@@ -20,12 +103,23 @@ Authorization is via JWT and requires the following to be carried out:
 
 ### Configure Ingest API
 If you are inserting or deleting data via the Ingest API then execute the followng steps:
-* [Set Up Ingestion API Connector](https://help.salesforce.com/s/articleView?id=sf.c360_a_connect_an_ingestion_source.htm&type=5)
-* [Create an Ingestion API Data Stream](https://help.salesforce.com/s/articleView?id=sf.c360_a_create_ingestion_data_stream.htm&type=5)
+* [Set Up Ingestion API Connector](https://help.salesforce.com/s/articleView?id=sf.c360_a_connect_an_ingestion_source.htm&type=5) - As an admin in Data Cloud, set up an Ingestion API connector source and define the schema for input objects.
+* [Create an Ingestion API Data Stream](https://help.salesforce.com/s/articleView?id=sf.c360_a_create_ingestion_data_stream.htm&type=5) - This step defines the Data Lake Objects that the data streams will write to inside Data Cloud.  After the data streams are deployed, you can make calls to the object endpoints to send data into Data Cloud.
 
 ### Install Required Python Libraries
 
-TODO
+* Recommended: Create a virtual python environment:
+```console
+mkdir .venv
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+* Install the required Python libraries:
+```console
+python3 -m pip install --upgrade pip
+pip install filesplit PyJWT python-dotenv requests urllib3 pandas
+```
 
 ### Configure Environment Variables
 

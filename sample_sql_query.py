@@ -1,4 +1,4 @@
-import pandas as pd
+"""Sample script to illustrate how to Query data from Salesforce Data Cloud"""
 from salesforce_datacloud_utils import SalesforceDataCloud
 
 sql_query_str="""

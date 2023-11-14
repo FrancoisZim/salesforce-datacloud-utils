@@ -1,4 +1,8 @@
-'''Uses boto3 to find matching filenames in s3 and bulk upsert to datacloud'''
+'''Uses boto3 to find matching filenames in s3 and bulk upsert to datacloud
+
+Requires the following additional python libraries:
+  pip install boto3
+'''
 
 from salesforce_datacloud_utils import SalesforceDataCloud
 import sys, os, fnmatch, boto3, botocore
