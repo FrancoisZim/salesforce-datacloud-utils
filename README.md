@@ -12,6 +12,22 @@ from salesforce_datacloud_utils import SalesforceDataCloud
 sfdc=SalesforceDataCloud()
 ```
 
+Constructor Definition:
+```python
+def __init__(self, login_url:str = DEFAULT_LOGIN_URL, client_id:str = "", private_key_file:str = "", user_name:str = "", temp_dir:str = "", input_file_encoding:str = "utf-8"):
+```
+Initialise an instance of the API handler
+
+The following are typically be specified as environment variables or in a .env file 
+but they can be overridden in the constructor if required:
+* login_url - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
+* client_id - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
+* private_key_file - Path to the Private Key file generated above (server.key)
+* user_name - The pre-authorised salesforce user that will be used for API access
+* temp_dir - Directory for creating temporary files during execution
+* input_file_encoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
+
+
 ### Upstert Date via Streaming Ingest API
 Example: `sample_streaming_upsert.py`
 
@@ -67,10 +83,48 @@ Returns the result of the specified query
 
 Returns a Dataframe containing query output
 
-### View or terminate bulk jobs
+### List jobs
+```python
+def list_jobs(self, limit: int=50, offset=0, orderby: str="", state: str="") -> requests.Response:
+```
+Retrieves all jobs in Data Cloud
 
+* limit (int) - The number of records to return. Defaults to 20. Maximum up to 100 records per request.
+* offset (int) - Number of rows to skip before returning.
+* orderBy (str) - The field used to order job definition results. The default order is by systemModstamp.
+* states (str)	Get jobs in specific states. Valid states are Open, UploadComplete, Failed, Aborted, and JobComplete. The parameter’s value can be a comma-delimited list.
 
-### CLI Usage Notes
+Returns the response object from the API call
+
+### Get status information for a job
+```python
+def job_info(self, job_id: str) -> requests.Response:
+```
+
+Retrieves detailed information about the specified job.
+
+* job_id (int) - The job id returned in the response body from the Create Job request.
+
+Returns the response object from the API call
+
+### Terminate a job
+```python
+def abort_job(self, job_id: str) -> requests.Response:
+```
+
+Attempts to abort the specified job
+
+* job_id (int) - The job id returned in the response body from the Create Job request.
+
+Returns the response object from the API call
+
+### Terminate all jobs
+```python
+def abort_all_jobs(self) -> None:
+```
+Attempts to abort all Open and UploadComplete jobs in the Data Cloud instance
+
+## Manage bulk jobs via the CLI
 A subset of functions are exposed via CLI to enable you to monitor and terminate active jobs if required.
 
 ```console
@@ -90,11 +144,21 @@ optional arguments:
   --command {list_active_jobs,list_all_jobs,job_info,abort_job}
                         Select the operation to execute
   --job_id JOB_ID       The job id returned in the response body from the Create Job request.
+
+These job management functions can also be accessed by invoking the following methods:
+```python
+def list_jobs(self, limit: int=50, offset=0, orderby: str="", state: str="") -> requests.Response:
 ```
+Retrieves all jobs in Data Cloud
 
+* limit (int) - The number of records to return. Defaults to 20. Maximum up to 100 records per request.
+* offset (int) - Number of rows to skip before returning.
+* orderBy (str) - The field used to order job definition results. The default order is by systemModstamp.
+* states (str)	Get jobs in specific states. Valid states are Open, UploadComplete, Failed, Aborted, and JobComplete. The parameter’s value can be a comma-delimited list.
 
+Returns the response object from the API call
+ 
 ## Pre-requisites
-
 ### Configure Data Cloud Connected App and OAuth Certificates
 Authorization is via JWT and requires the following to be carried out:
 * [Create a Private Key and Self-Signed Digital Certificate](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm) - the Privte Key (server.key) file here will be used by the scrips and the Certificate (server.crt) will be passed to the Connected App configuration..
@@ -132,12 +196,13 @@ pip install filesplit PyJWT python-dotenv requests urllib3 pandas
 
 ### Configure Environment Variables
 
-Configure the following as environment variables or write to a .env file in the installation directory:
+We recommend that you configure the following as environment variables or write to a .env file in the installation directory:
 
+* loginUrl - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
 * clientId - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
 * privateKeyFile - Path to the Private Key file generated above (server.key)
 * userName - The pre-authorised salesforce user that will be used for API access
 * tempDir - Directory for creating temporary files during execution
 * inputFileEncoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
 
-
+If required these can be passed as arguments to the SalesforceDataCloud object constructor to override the environment variables.

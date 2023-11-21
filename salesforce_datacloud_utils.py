@@ -2,12 +2,17 @@
 
 Utility functions for the Data Cloud API
 
-Configure the following in the environment or a .env file before use
-clientId=XXX
-privateKeyFile=server.key
-userName=XXX@tabemeadatacloud.demo
-tempDir=tempfiles
-inputFileEncoding=utf-8
+We recommend that you configure the following as environment variables or write to a .env file in the installation directory:
+
+* loginUrl - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
+* clientId - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
+* privateKeyFile - Path to the Private Key file generated above (server.key)
+* userName - The pre-authorised salesforce user that will be used for API access
+* tempDir - Directory for creating temporary files during execution
+* inputFileEncoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
+
+If required these can be passed as arguments to the constructor to override the environment variables.
+
 """
 
 import requests
@@ -35,6 +40,14 @@ See: https://help.salesforce.com/s/articleView?id=sf.c360_a_limits_and_guideline
 BULK_API_MAX_PAYLOAD_SIZE=150 * 1000 * 1000
 STREAMING_API_MAX_PAYLOAD_SIZE=200 * 1000
 
+"""
+API Defaults
+"""
+DEFAULT_LOGIN_URL="login.salesforce.com"
+API_VERSION="52.0"
+
+
+
 # Initialize logging
 consoleHandler = logging.StreamHandler()
 consoleHandler.setLevel(logging.INFO)
@@ -53,15 +66,28 @@ class SalesforceDataCloud:
     Handles authentication and basic operations to the Data Cloud REST API.
 
     """
-    def __init__(self):
+    def __init__(self, login_url:str = DEFAULT_LOGIN_URL, client_id:str = "", private_key_file:str = "", user_name:str = "", temp_dir:str = "", input_file_encoding:str = "utf-8"):
+        """
+        Initialise an instance of the API handler
+
+        The following are typically be specified as environment variables or in a .env file 
+        but they can be overridden in the constructor if required:
+        * login_url - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
+        * client_id - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
+        * private_key_file - Path to the Private Key file generated above (server.key)
+        * user_name - The pre-authorised salesforce user that will be used for API access
+        * temp_dir - Directory for creating temporary files during execution
+        * input_file_encoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
+
+        """
         self.context = {
-            "loginUrl": "login.salesforce.com",
-            "version": "52.0",
-            "clientId": os.getenv('clientId'),
-            "privateKeyFile": os.getenv('privateKeyFile'),
-            "userName": os.getenv('userName'),
-            "tempDir": os.getenv('tempDir'),
-            "inputFileEncoding": os.getenv("inputFileEncoding", "utf-8"),
+            "loginUrl": login_url or os.getenv('loginUrl') or "login.salesforce.com",
+            "version": API_VERSION,
+            "clientId": client_id or os.getenv('clientId'),
+            "privateKeyFile": private_key_file or os.getenv('privateKeyFile'),
+            "userName": user_name or os.getenv('userName'),
+            "tempDir": temp_dir or os.getenv('tempDir'),
+            "inputFileEncoding": input_file_encoding or os.getenv("inputFileEncoding", "utf-8"),
             "dne_cdpTokenRefreshTime": 0,
         }
         # Read the private key from a file
@@ -398,7 +424,7 @@ class SalesforceDataCloud:
     
     def abort_all_jobs(self) -> None:
         """
-        Attempts to abort all Open and UploadComplete jobs in Data Cloud
+        Attempts to abort all Open and UploadComplete jobs in the Data Cloud instance
         """
         self._authenticate()
         response=self.list_jobs(state="Open,UploadComplete")
