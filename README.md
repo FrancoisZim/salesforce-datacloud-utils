@@ -145,18 +145,7 @@ optional arguments:
                         Select the operation to execute
   --job_id JOB_ID       The job id returned in the response body from the Create Job request.
 
-These job management functions can also be accessed by invoking the following methods:
-```python
-def list_jobs(self, limit: int=50, offset=0, orderby: str="", state: str="") -> requests.Response:
 ```
-Retrieves all jobs in Data Cloud
-
-* limit (int) - The number of records to return. Defaults to 20. Maximum up to 100 records per request.
-* offset (int) - Number of rows to skip before returning.
-* orderBy (str) - The field used to order job definition results. The default order is by systemModstamp.
-* states (str)	Get jobs in specific states. Valid states are Open, UploadComplete, Failed, Aborted, and JobComplete. The parameter’s value can be a comma-delimited list.
-
-Returns the response object from the API call
  
 ## Pre-requisites
 ### Configure Data Cloud Connected App and OAuth Certificates
