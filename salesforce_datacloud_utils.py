@@ -4,12 +4,12 @@ Utility functions for the Data Cloud API
 
 We recommend that you configure the following as environment variables or write to a .env file in the installation directory:
 
-* loginUrl - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
-* clientId - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
-* privateKeyFile - Path to the Private Key file generated above (server.key)
-* userName - The pre-authorised salesforce user that will be used for API access
-* tempDir - Directory for creating temporary files during execution
-* inputFileEncoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
+* sf_login_url - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
+* client_id - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
+* private_key_file - Path to the Private Key file generated above (server.key)
+* sf_user_name - The pre-authorised salesforce user that will be used for API access
+* temp_dir - Directory for creating temporary files during execution
+* imput_file_encoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
 
 If required these can be passed as arguments to the constructor to override the environment variables.
 
@@ -18,7 +18,6 @@ If required these can be passed as arguments to the constructor to override the 
 import requests
 import json
 import pandas as pd 
-import csv
 import time
 import argparse
 import logging
@@ -66,28 +65,27 @@ class SalesforceDataCloud:
     Handles authentication and basic operations to the Data Cloud REST API.
 
     """
-    def __init__(self, login_url:str = DEFAULT_LOGIN_URL, client_id:str = "", private_key_file:str = "", user_name:str = "", temp_dir:str = "", input_file_encoding:str = "utf-8"):
+    def __init__(self, sf_login_url:str = DEFAULT_LOGIN_URL, client_id:str = "", private_key_file:str = "", sf_user_name:str = "", temp_dir:str = "", input_file_encoding:str = "utf-8"):
         """
-        Initialise an instance of the API handler
-
-        The following are typically be specified as environment variables or in a .env file 
+        Initialise an instance of the API handler.  The following are typically be specified as environment variables or in a .env file 
         but they can be overridden in the constructor if required:
-        * login_url - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
+
+        * sf_login_url - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
         * client_id - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
         * private_key_file - Path to the Private Key file generated above (server.key)
-        * user_name - The pre-authorised salesforce user that will be used for API access
+        * sf_user_name - The pre-authorised salesforce user that will be used for API access
         * temp_dir - Directory for creating temporary files during execution
         * input_file_encoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
 
         """
         self.context = {
-            "loginUrl": login_url or os.getenv('loginUrl') or "login.salesforce.com",
+            "loginUrl": sf_login_url or os.getenv('SF_LOGIN_URL') or os.getenv('loginUrl') or "login.salesforce.com",
             "version": API_VERSION,
-            "clientId": client_id or os.getenv('clientId'),
-            "privateKeyFile": private_key_file or os.getenv('privateKeyFile'),
-            "userName": user_name or os.getenv('userName'),
-            "tempDir": temp_dir or os.getenv('tempDir'),
-            "inputFileEncoding": input_file_encoding or os.getenv("inputFileEncoding", "utf-8"),
+            "clientId": client_id or os.getenv('CLIENT_ID') or os.getenv('clientId'),
+            "privateKeyFile": private_key_file or os.getenv('PRIVATE_KEY_FILE') or os.getenv('privateKeyFile'),
+            "userName": sf_user_name or os.getenv('SF_USER_NAME') or os.getenv('userName'),
+            "tempDir": temp_dir or os.getenv('TEMP_DIR') or os.getenv('tempDir'),
+            "inputFileEncoding": input_file_encoding or os.getenv('INPUT_FILE_ENCODING') or os.getenv("inputFileEncoding", "utf-8"),
             "dne_cdpTokenRefreshTime": 0,
         }
         # Read the private key from a file

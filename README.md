@@ -3,32 +3,30 @@ Simple utility functions for calling the Salesforce Data Cloud APIs, specificall
 
 ## Overview
 
-This package provides a basic REST API wrapper around the Salesforce Data Cloud API.  To use:
+This package provides a basic REST API wrapper around the Salesforce Data Cloud API to enable data query, upsert and delete as well as basic bulk job management.
+
+## Usage
 
 ### Create a new instance of the SalesforceDataCloud class
+
+Initialise an instance of the API handler:
 
 ```python
 from salesforce_datacloud_utils import SalesforceDataCloud
 sfdc=SalesforceDataCloud()
 ```
 
-Constructor Definition:
-```python
-def __init__(self, login_url:str = DEFAULT_LOGIN_URL, client_id:str = "", private_key_file:str = "", user_name:str = "", temp_dir:str = "", input_file_encoding:str = "utf-8"):
-```
-Initialise an instance of the API handler
-
 The following are typically be specified as environment variables or in a .env file 
 but they can be overridden in the constructor if required:
-* login_url - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
+* sf_login_url - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
 * client_id - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
 * private_key_file - Path to the Private Key file generated above (server.key)
-* user_name - The pre-authorised salesforce user that will be used for API access
+* sf_user_name - The pre-authorised salesforce user that will be used for API access
 * temp_dir - Directory for creating temporary files during execution
 * input_file_encoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
 
 
-### Upstert Date via Streaming Ingest API
+### Upsert data via Streaming Ingest API
 Example: `sample_streaming_upsert.py`
 
 ```python
@@ -43,7 +41,7 @@ Upsert one or more rows of data via Streaming Ingest API
 
 Returns the response object from the API call
 
-### Upstert Date via Bulk Ingest API
+### Upsert data via Bulk Ingest API
 Example: `sample_bulk_upsert.py`
 
 ```python
@@ -57,7 +55,7 @@ Upsert one or more files of data via Bulk Ingest API
 
 Returns the response object from the API call
 
-### Delete Date via Bulk Ingest API
+### Delete data via Bulk Ingest API
 Example: `sample_bulk_delete.py`
 
 ```python
@@ -187,11 +185,11 @@ pip install filesplit PyJWT python-dotenv requests urllib3 pandas
 
 We recommend that you configure the following as environment variables or write to a .env file in the installation directory:
 
-* loginUrl - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
-* clientId - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
-* privateKeyFile - Path to the Private Key file generated above (server.key)
-* userName - The pre-authorised salesforce user that will be used for API access
-* tempDir - Directory for creating temporary files during execution
-* inputFileEncoding - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
+* SF_LOGIN_URL - Salesforce login URL - defaults to: "login.salesforce.com" if not specified.
+* CLIENT_ID - [The Consumer Key](https://help.salesforce.com/s/articleView?id=sf.connected_app_rotate_consumer_details.htm&type=5) from the connected app that was configured in Salesforce above
+* PRIVATE_KEY_FILE - Path to the Private Key file generated above (server.key)
+* USER_NAME - The pre-authorised salesforce user that will be used for API access
+* TEMP_DIR - Directory for creating temporary files during execution
+* INPUT_FILE_ENCODING - Specifies the encoding of the source files that will be uploaded via the IngestAPI (Default: utf-8)
 
 If required these can be passed as arguments to the SalesforceDataCloud object constructor to override the environment variables.
