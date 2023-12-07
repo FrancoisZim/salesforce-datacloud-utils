@@ -1,4 +1,7 @@
 # salesforce-datacloud-utils
+
+![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-53bd92.svg)
+
 Simple utility functions for calling the Salesforce Data Cloud APIs, specifically the Ingest API and Query APIv2.
 
 ## Overview
